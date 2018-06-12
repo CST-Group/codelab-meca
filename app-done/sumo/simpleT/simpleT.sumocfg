@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.sf.net/xsd/sumoConfiguration.xsd">
+
+    <input>
+        <net-file value="simpleT.net.xml"/>
+        <route-files value="simpleT.rou.xml"/>
+	<additional-files value="simpleT.add.xml"/>
+    </input>
+    
+    <output>
+        <summary-output value="simpleT.out.xml"/>
+    </output>
+
+    <report>
+        <verbose value="true"/>
+        <duration-log.statistics value="true"/>
+        <no-step-log value="true"/>
+    </report>
+
+    <gui_only>
+        <gui-settings-file value="simpleT.gui.xml"/>
+        <start value="true"/>
+        <game value="true"/>
+    </gui_only>
+
+</configuration>

@@ -1,0 +1,12 @@
+<additional>
+	<e1Detector file="e1output.xml" freq="30" friendlyPos="x" id="e1det_0:1_0" lane="0:1_0" length="90.4" pos="85"/>
+	<e1Detector file="e1output.xml" freq="30" friendlyPos="x" id="e1det_0:1_1" lane="0:1_1" length="90.4" pos="85"/>
+	<e1Detector file="e1output.xml" freq="30" friendlyPos="x" id="e1det_3:1_0" lane="3:1_0" length="170.15" pos="165"/>
+	<e1Detector file="e1output.xml" freq="30" friendlyPos="x" id="e1det_3:1_1" lane="3:1_1" length="170.15" pos="165"/>
+	<e1Detector file="e1output.xml" freq="30" friendlyPos="x" id="e1det_5:1_0" lane="5:1_0" length="159.45" pos="155"/>
+	<e1Detector file="e1output.xml" freq="30" friendlyPos="x" id="e1det_1:0_0" lane="1:0_0" length="90.4" pos="85"/>
+	<e1Detector file="e1output.xml" freq="30" friendlyPos="x" id="e1det_1:0_1" lane="1:0_1" length="90.4" pos="85"/>
+	<e1Detector file="e1output.xml" freq="30" friendlyPos="x" id="e1det_2:0_0" lane="2:0_0" length="170.15" pos="165"/>
+	<e1Detector file="e1output.xml" freq="30" friendlyPos="x" id="e1det_2:0_1" lane="2:0_1" length="170.15" pos="165"/>
+	<e1Detector file="e1output.xml" freq="30" friendlyPos="x" id="e1det_9:0_0" lane="9:0_0" length="159.45" pos="155"/>
+</additional>

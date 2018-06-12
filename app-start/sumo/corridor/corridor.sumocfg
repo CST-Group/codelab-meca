@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.sf.net/xsd/sumoConfiguration.xsd">
+
+    <input>
+        <net-file value="corridor.net.xml"/>
+        <route-files value="corridor.rou.xml"/>
+	<additional-files value="corridor.add.xml"/>
+    </input>
+    
+    <output>
+        <summary-output value="corridor.out.xml"/>
+    </output>
+
+    <report>
+        <verbose value="true"/>
+        <duration-log.statistics value="true"/>
+        <no-step-log value="true"/>
+    </report>
+
+    <gui_only>
+        <gui-settings-file value="corridor.gui.xml"/>
+        <start value="true"/>
+        <game value="true"/>
+    </gui_only>
+
+</configuration>

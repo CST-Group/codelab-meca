@@ -1,0 +1,11 @@
+<viewsettings>
+    <scheme name="car">
+        <vehicles vehicleMode="0" vehicleQuality="2" vehicle_minSize="1.00" vehicle_exaggeration="1.00" vehicle_constantSize="0" showBlinker="1"
+                  vehicleName_show="0" vehicleName_size="50.00" vehicleName_color="204,153,0">
+            <colorScheme name="given vehicle/type/route color">
+                <entry color="yellow"/>
+            </colorScheme>
+        </vehicles>
+    <viewport zoom="423.15" x="244.59" y="236.53"/>
+    <delay value="200.00"/>
+</viewsettings>

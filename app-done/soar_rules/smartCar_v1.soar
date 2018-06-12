@@ -1,0 +1,452 @@
+############################# CONFIGURATION ##################################
+watch 5
+learn --off
+epmem --set learning off
+#smem --off
+#log --level error
+
+#####
+sp {create*essetial*structures
+   (state <s> ^io.input-link <il>)
+   (<il> ^CURRENT_PERCEPTION <cp>)
+   (<cp> ^CONFIGURATION <conf>)
+   (<conf> ^TRAFFIC_LIGHT <tl>)
+   (<tl> ^CURRENT_PHASE <current>)
+   (<tl> ^BOUNDS.MAX_TIME <max>)
+   (<tl> ^BOUNDS.MIN_TIME <min>)
+-->
+   (<cp> ^maths <math>)
+   (<math> ^remainingWindow (- <max> <time>))
+   (<math> ^remainingWindowPlusMin (+ (- <max> <time>) <min>))
+   (<math> ^remainingWindowPlusNextEqualWindow (+(+(- <max> <time>) <min>) <max>))
+   (<math> ^remainingWindowPlusNextWindow (+ (- <max> <time>) <nextMax>))
+   (<math> ^tooDistant (+(+(- <max> <time>) <max>) <max>))
+   
+}
+
+
+################## GREENLIGHT ARRIVAL SOONER THAN WINDOW #######################
+# if the remaining window is greater than estimated time of arrival, then keep  this phase for more (estimated time) seconds
+#
+
+sp {propose*keep_greenlight*window
+   (state <s> ^io.input-link <il>)
+   (<il> ^CURRENT_PERCEPTION <cp>)
+   (<cp> ^CONFIGURATION <conf>)
+   (<cp> ^maths.remainingWindow <value>)
+   (<conf> ^SMARTCAR_INFO <smartcar>)
+   (<conf> ^TRAFFIC_LIGHT <tl>)
+   (<tl> ^CURRENT_PHASE <current>)
+   (<current> ^PHASE GREEN)
+   (<current> ^ELAPSED_TIME <time>)
+   (<tl> ^BOUNDS.MAX_TIME <max>)
+   (<tl> ^BOUNDS.MIN_TIME <min>)
+   (<smartcar> ^ESTIMATED_ARRIVAL.ESTIMATED_ARRIVAL <arrivalTime> <= <value>)
+-->
+   (<s> ^operator <o> +)
+   (<o> ^name keep_greenlight)
+}
+
+sp {apply*keep_greenlight*window
+   (state <s> ^operator <o>
+	     ^io <io>)
+   (<io> ^input-link <il>
+	^output-link <ol>)
+   (<o> ^name keep_greenlight)
+-->
+   (<ol> ^SoarCommandKeep <command>)
+   (halt)
+}
+
+sp {apply*keep_greenlight*remove
+   (state <s> ^operator.name keep_greenlight
+	     ^io.output-link <out>)
+   (<out> ^SoarCommandKeep <command>)
+   (<command> ^status complete)
+-->
+   (<out> ^SoarCommandKeep <command> -)
+}
+
+##parei aqui
+
+#################### GREENLIGHT pensar em um nome legal  ###########################
+# if the remaining window is smaller than estimated time of arrival but the arrival can occur sometime between the next green phase (window + min_red + green), then keep this phase till the end
+#
+
+sp {propose*keep_greenlight*full*window
+   (state <s> ^io.input-link <il>)
+   (<il> ^CURRENT_PERCEPTION <cp>)
+   (<cp> ^CONFIGURATION <conf>)
+   (<cp> ^maths.remainingWindowPlusMin <value>)
+   (<cp> ^maths.remainingWindowPlusNextEqualWindow <value2>)
+   (<conf> ^SMARTCAR_INFO <smartcar>)
+   (<conf> ^TRAFFIC_LIGHT <tl>)
+   (<tl> ^CURRENT_PHASE <current>)
+   (<current> ^PHASE GREEN)
+   (<current> ^ELAPSED_TIME <time>)
+   (<tl> ^BOUNDS.MAX_TIME <max>)
+   (<tl> ^BOUNDS.MIN_TIME <min>)
+   (<smartcar> ^ESTIMATED_ARRIVAL.ESTIMATED_ARRIVAL <arrivalTime> > <value>)
+   (<arrivalTime> < <value2>)
+-->
+   (<s> ^operator <o> +)
+   (<o> ^name keep_greenlight)
+}
+
+#the apply and remove are the same as the former ones. Then, is not necessary rewrite code 
+
+
+################## GREENLIGHT pensar em nome legal  #######################
+# if the estimated arrival time lies somewhere between the remaining window and the remaining window + min_red, then change the phase imediatly
+
+sp {propose*change_greenlight
+   (state <s> ^io.input-link <il>)
+   (<il> ^CURRENT_PERCEPTION <cp>)
+   (<cp> ^CONFIGURATION <conf>)
+   (<cp> ^maths.remainingWindow <window>)
+   (<cp> ^maths.remainingWindowPlusMin <value>)
+   (<conf> ^SMARTCAR_INFO <smartcar>)
+   (<conf> ^TRAFFIC_LIGHT <tl>)
+   (<tl> ^CURRENT_PHASE <current>)
+   (<current> ^PHASE GREEN)
+   (<current> ^ELAPSED_TIME <time>)
+   (<tl> ^BOUNDS.MAX_TIME <max>)
+   (<tl> ^BOUNDS.MIN_TIME <min>)
+   (<smartcar> ^ESTIMATED_ARRIVAL.ESTIMATED_ARRIVAL <arrivalTime> >= <window>)
+   (<arrivalTime> > <min>)
+   (<arrivalTime> < <value>)
+-->
+   (<s> ^operator <o> +)
+   (<o> ^name change_greenlight)
+}
+
+sp {apply*change_greenlight
+   (state <s> ^operator <o>
+	     ^io <io>)
+   (<io> ^input-link <il>
+	^output-link <ol>)
+   (<o> ^name change_greenlight)
+   (<o> ^time <time>)
+-->
+   (<ol> ^SoarCommandChange <command>)
+   (halt)
+}
+
+sp {apply*change_greenlight*remove
+   (state <s> ^operator.name change_greenlight
+	     ^io.output-link <out>)
+   (<out> ^SoarCommandChange <command>)
+   (<command> ^status complete)
+-->
+   (<out> ^SoarCommandChange <command> -)
+}
+
+################## GREENLIGHT pensar em nome legal  #######################
+# if the estimated arrival time is smaller than the minRed AND greather than  the remaining window, then we are doomed and should calculate decisions to archive minimal waiting time
+
+sp {propose*keep_or_change_greenlight*doomed
+   (state <s> ^io.input-link <il>)
+   (<il> ^CURRENT_PERCEPTION <cp>)
+   (<cp> ^CONFIGURATION <conf>)
+   (<cp> ^maths.remainingWindow <window>)
+   (<conf> ^SMARTCAR_INFO <smartcar>)
+   (<conf> ^TRAFFIC_LIGHT <tl>)
+   (<tl> ^CURRENT_PHASE <current>)
+   (<current> ^PHASE GREEN)
+   (<current> ^ELAPSED_TIME <time>)
+   (<tl> ^BOUNDS.MAX_TIME <max>)
+   (<tl> ^BOUNDS.MIN_TIME <min>)
+   (<smartcar> ^ESTIMATED_ARRIVAL.ESTIMATED_ARRIVAL <arrivalTime> >= <window>)
+   (<arrivalTime> < <min>)
+-->
+   (<s> ^operator <o> +)
+   (<o> ^name change_or_keep_greenlight_doomed)
+   (<o> ^parameters <par>)
+   (<par> ^ifChangeWaitingTime - <min> <arrivalTime>)
+   (<par> ^ifKeepWaitingTime (- <arrivalTime> (- <max> <time>)))
+}
+
+sp {apply*change_greenlight*doomed
+   (state <s> ^operator <o>
+	     ^io <io>)
+   (<io> ^input-link <il>
+	^output-link <ol>)
+   (<o> ^name change_or_keep_greenlight_doomed)
+   (<o> ^parameters.ifKeepWaitingTime <keepTime>
+       ^parameters.ifChangeWaitingTime <changeTime> < <keepTime>)
+-->
+   (<ol> ^SoarCommandChanoarRulesVerage <command>)
+   (halt)
+}
+
+sp {apply*keep_greenlight*doomed
+   (state <s> ^operator <o>
+	     ^io <io>)
+   (<io> ^input-link <il>
+	^output-link <ol>)
+   (<o> ^name change_or_keep_greenlight_doomed)
+   (<o> ^parameters.ifChangeWaitingTime <changeTime>
+       ^parameters.ifKeepWaitingTime <keepTime> < <changeTime>)
+-->
+   (<ol> ^SoarCommandKeep <command>)
+   (halt)
+}
+
+sp {apply*change_greenlight*doomed*remove
+   (state <s> ^operator.name change_or_keep_greenlight_doomed
+	     ^io.output-link <out>)
+   (<out> ^SoarCommandChange <command>)
+   (<command> ^status complete)
+-->
+   (<out> ^SoarCommandChange <command> -)
+}
+
+
+sp {apply*keep_greenlight*doomed*remove
+   (state <s> ^operator.name change_or_keep_greenlight_doomed
+	     ^io.output-link <out>)
+   (<out> ^SoarCommandKeep <command>)
+   (<command> ^status complete)
+-->
+   (<out> ^SoarCommandKeep <command> -)
+}
+
+################## GREENLIGHT pensar em nome legal  #######################
+# if the estimated arrival time lies beyond the remaining window + max_red + max_green, then the smartcar is too far and the decision should be taken by the System_1
+
+sp {propose*do_nothing
+   (state <s> ^io.input-link <il>)
+   (<il> ^CURRENT_PERCEPTION <cp>)
+   (<cp> ^CONFIGURATION <conf>)
+   (<cp> ^maths.tooDistant <value>)
+   (<conf> ^SMARTCAR_INFO <smartcar>)
+   (<conf> ^TRAFFIC_LIGHT <tl>)
+   (<tl> ^CURRENT_PHASE <current>)
+   (<current> ^PHASE <phase>)
+   (<current> ^ELAPSED_TIME <time>)
+   (<tl> ^BOUNDS.MAX_TIME <max>)
+   (<tl> ^BOUNDS.MIN_TIME <min>)
+   (<smartcar> ^ESTIMATED_ARRIVAL.ESTIMATED_ARRIVAL <arrivalTime> >= <value>)
+-->
+   (<s> ^operator <o> +)
+   (<o> ^name do_nothing)
+}
+
+sp {apply*do_nothing
+   (state <s> ^operator <o>
+	     ^io <io>)
+   (<io> ^input-link <il>
+	^output-link <ol>)
+   (<o> ^name do_nothing)
+-->
+   (<ol> ^SoarCommandDoNothing <command>)
+   (halt)
+}
+
+sp {apply*do_Nothing*remove
+   (state <s> ^operator.name do_nothing
+	     ^io.output-link <out>)
+   (<out> ^SoarCommandKeep <command>)
+   (<command> ^status complete)
+-->
+   (<out> ^SoarCommandKeep <command> -)
+}
+
+################## REDLIGHT pensar em nome legal  #######################
+# if the estimated arrival time is greather than window and less than max_g, then keep the current phase till the end 
+
+sp {propose*keep_redlight
+   (state <s> ^io.input-link <il>)
+   (<il> ^CURRENT_PERCEPTION <cp>)
+   (<cp> ^CONFIGURATION <conf>)
+   (<cp> ^maths.remainingWindow <value>)
+   (<conf> ^SMARTCAR_INFO <smartcar>)
+   (<conf> ^TRAFFIC_LIGHT <tl>)
+   (<tl> ^CURRENT_PHASE <current>)
+   (<current> ^PHASE RED)
+   (<current> ^ELAPSED_TIME <time>)
+   (<tl> ^BOUNDS.MAX_TIME <max>)
+   (<tl> ^BOUNDS.MIN_TIME <min>)
+   (<smartcar> ^ESTIMATED_ARRIVAL.ESTIMATED_ARRIVAL <arrivalTime> >=  <value>)
+   (<arrivalTime> < <max>)
+-->
+   (<s> ^operator <o> +)
+   (<o> ^name keep_redlight)
+
+}
+
+sp {apply*keep_redlight
+   (state <s> ^operator <o>
+	     ^io <io>)
+   (<io> ^input-link <il>
+	^output-link <ol>)
+   (<o> ^name keep_redlight)
+-->
+   (<ol> ^SoarCommandKeep <command>)
+   (halt)
+}
+
+sp {apply*keep_redlight*remove
+   (state <s> ^operator.name keep_redlight
+	     ^io.output-link <out>)
+   (<out> ^SoarCommandKeep <command>)
+   (<command> ^status complete)
+-->
+   (<out> ^SoarCommandKeep <command> -)
+}
+
+################## REDLIGHT pensar em nome legal  #######################
+# if the estimated arrival time is smaller than window and less than max_g and the phase time in greather than min_R, then change to the next phase 
+
+sp {propose*change_redlight_now
+   (state <s> ^io.input-link <il>)
+   (<il> ^CURRENT_PERCEPTION <cp>)
+   (<cp> ^CONFIGURATION <conf>)
+   (<cp> ^maths.remainingWindow <value>)
+   (<conf> ^SMARTCAR_INFO <smartcar>)
+   (<conf> ^TRAFFIC_LIGHT <tl>)
+   (<tl> ^CURRENT_PHASE <current>)
+   (<current> ^PHASE RED)
+   (<current> ^ELAPSED_TIME <time>)
+   (<tl> ^BOUNDS.MAX_TIME <max>)
+   (<tl> ^BOUNDS.MIN_TIME <min>)
+   (<smartcar> ^ESTIMATED_ARRIVAL.ESTIMATED_ARRIVAL <arrivalTime> <= <value>)
+   (<time> > <min>)
+   (<arrivalTime> < <max>)
+-->
+   (<s> ^operator <o> +)
+   (<o> ^name change_redlight)
+}
+
+sp {apply*change_redlight
+   (state <s> ^operator <o>
+	     ^io <io>)
+   (<io> ^input-link <il>
+	^output-link <ol>)
+   (<o> ^name change_redlight)
+-->
+   (<ol> ^SoarCommandChange <command>)
+   (halt)
+}
+
+sp {apply*change_redlight*remove
+   (state <s> ^operator.name change_redlight
+	     ^io.output-link <out>)
+   (<out> ^SoarCommandChange <command>)
+   (<command> ^status complete)
+-->
+   (<out> ^SoarCommandChange <command> -)
+}
+
+################## REDLIGHT pensar em nome legal  #######################
+# if the estimated arrival time is smaller than window and the phase time is less than min_R, then keep current phase till the min time 
+
+sp {propose*keep_redlight_till_min
+   (state <s> ^io.input-link <il>)
+   (<il> ^CURRENT_PERCEPTION <cp>)
+   (<cp> ^CONFIGURATION <conf>)
+   (<cp> ^maths.remainingWindow <value>)
+   (<conf> ^SMARTCAR_INFO <smartcar>)
+   (<conf> ^TRAFFIC_LIGHT <tl>)
+   (<tl> ^CURRENT_PHASE <current>)
+   (<current> ^PHASE RED)
+   (<current> ^ELAPSED_TIME <time>)
+   (<tl> ^BOUNDS.MAX_TIME <max>)
+   (<tl> ^BOUNDS.MIN_TIME <min>)
+   (<smartcar> ^ESTIMATED_ARRIVAL.ESTIMATED_ARRIVAL <arrivalTime> <= <value>)
+   (<time> < <min>)
+-->
+   (<s> ^operator <o> +)
+   (<o> ^name keep_redlight)
+}
+
+sp {apply*keep_redlight_till_min
+   (state <s> ^operator <o>
+	     ^io <io>)
+   (<io> ^input-link <il>
+	^output-link <ol>)
+   (<o> ^name keep_redlight)
+-->
+   (<ol> ^SoarCommandKeep <command>)
+   (halt)
+}
+
+sp {apply*keep_redlight_till_min*remove
+   (state <s> ^operator.name keep_redlight
+	     ^io.output-link <out>)
+   (<out> ^SoarCommandKeep <command>)
+   (<command> ^status complete)
+-->
+   (<out> ^SoarCommandKeep <command> -)
+}
+
+################## REDLIGHT pensar em nome legal  #######################
+# if the estimated arrival time is greater than window, greater than max_g and smaller than window + max_G, then keep the current phase till the end 
+
+sp {propose*keep_redlight_2
+   (state <s> ^io.input-link <il>)
+   (<il> ^CURRENT_PERCEPTION <cp>)
+   (<cp> ^CONFIGURATION <conf>)
+   (<cp> ^maths.remainingWindow <value>)
+   (<cp> ^maths.remainingWindowPlusNextWindow <value2>)
+   (<conf> ^SMARTCAR_INFO <smartcar>)
+   (<conf> ^TRAFFIC_LIGHT <tl>)
+   (<tl> ^CURRENT_PHASE <current>)
+   (<current> ^PHASE RED)
+   (<current> ^ELAPSED_TIME <time>)
+   (<tl> ^BOUNDS.MAX_TIME <max>)
+   (<tl> ^BOUNDS.MIN_TIME <min>)
+   (<smartcar> ^ESTIMATED_ARRIVAL.ESTIMATED_ARRIVAL <arrivalTime> >= <value>)
+   (<arrivalTime> > <max>)
+   (<arrivalTime> < <value2>)
+-->
+   (<s> ^operator <o> +)
+   (<o> ^name keep_redlight)
+}
+
+# apply and remove same as the first redlight production
+
+####################################################### se n tiver smartcar, n faça nada
+sp {propose*do_nothing
+   (state <s> ^io.input-link <il>)
+   (<il> ^CURRENT_PERCEPTION <cp>)
+   (<cp> ^CONFIGURATION <conf>)
+   (<conf> ^NO_SMARTCAR.NO_SMARTCAR TRUE)
+-->
+   (<s> ^operator <o> +)
+   (<o> ^name do_nothing)
+}
+
+sp {apply*do_nothing
+   (state <s> ^operator <o>
+	     ^io <io>)
+   (<io> ^input-link <il>
+	^output-link <ol>)
+   (<o> ^name do_nothing)
+-->
+   (<ol> ^SoarCommandDoNothing <command>)
+}
+
+sp {apply*do_nothing*remove
+   (state <s> ^operator.name do_nothing
+	     ^io.output-link <out>)
+   (<out> ^SoarCommandDoNothing <command>)
+   (<command> ^status complete)
+-->
+   (<out> ^SoarCommandDoNothing <command> -)
+}
+
+sp {halt*condition
+   (state <s> ^impasse no-change ^type state -^operator ^attribute operator)
+-->
+  #(write I2)
+  #(halt)
+   (interrupt)
+}
+
+
+
+
+
+
+

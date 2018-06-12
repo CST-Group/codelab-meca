@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on Qua  5 Jul 19:44:42 2017 by SUMO gui Version 0.28.0
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumo-gui.exeConfiguration.xsd">
+
+    <input>
+        <net-file value="/Users/du/Repository/ericsson/app-sumo-eca/sumo/twinT/twinT.net.xml"/>
+        <route-files value="/Users/du/Repository/ericsson/app-sumo-eca/sumo/twinT/twinT.rou.xml"/>
+        <additional-files value="/Users/du/Repository/ericsson/app-sumo-eca/sumo/twinT/twinT.add.xml"/>
+    </input>
+
+    <output>
+        <summary-output value="/Users/du/Repository/ericsson/app-sumo-eca/sumo/twinT/twinT.out.xml"/>
+    </output>
+
+</configuration>
+-->
+
+<summary xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/summary_file.xsd">
+</summary>

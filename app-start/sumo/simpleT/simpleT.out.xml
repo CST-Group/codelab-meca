@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on Ter 11 Jul 16:25:12 2017 by SUMO gui Version 0.28.0
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumo-gui.exeConfiguration.xsd">
+
+    <input>
+        <net-file value="/Users/du/Repository/ericsson/app-sumo-eca/sumo/simpleT/simpleT.net.xml"/>
+        <route-files value="/Users/du/Repository/ericsson/app-sumo-eca/sumo/simpleT/simpleT.rou.xml"/>
+        <additional-files value="/Users/du/Repository/ericsson/app-sumo-eca/sumo/simpleT/simpleT.add.xml"/>
+    </input>
+
+    <output>
+        <summary-output value="/Users/du/Repository/ericsson/app-sumo-eca/sumo/simpleT/simpleT.out.xml"/>
+    </output>
+
+    <report>
+        <verbose value="true"/>
+        <duration-log.statistics value="true"/>
+        <no-step-log value="true"/>
+    </report>
+
+    <gui_only>
+        <gui-settings-file value="/Users/du/Repository/ericsson/app-sumo-eca/sumo/simpleT/simpleT.gui.xml"/>
+        <game value="true"/>
+        <start value="true"/>
+    </gui_only>
+
+</configuration>
+-->
+
+<summary xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/summary_file.xsd">
+    <step time="0.00" loaded="2" inserted="1" running="1" waiting="0" ended="0" meanWaitingTime="0.00" meanTravelTime="-1.00" duration="0"/>
+</summary>
